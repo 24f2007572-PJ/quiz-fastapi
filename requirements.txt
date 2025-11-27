@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+httpx
+jinja2
+python-dotenv
+requests-html
+beautifulsoup4
+nest_asyncio
+pydantic
