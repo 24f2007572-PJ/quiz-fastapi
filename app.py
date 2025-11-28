@@ -112,60 +112,80 @@ async def process_request(data: dict):
     print(f"[INFO] Processing request for: {email}")
 
     prompt = prompt = f"""
-        You are an advanced Python automation agent.
-        Your task:
-        Generate a fully functional Python script that **automates solving quizzes dynamically from URLs**.
-        ### Core Requirements:
-        1. **Visit the given quiz URL** from starturl using `httpx` or `requests_html` if JavaScript is needed.
-        2. Read the page and **Scrape quiz question - Question and possible answers** from the HTML or API response.
-        - Read the POST/Submitendpoint/url from the quiz page (Post your JSON answer to ) and save it to SUBMIT_URL variable
-        3. If the quiz requires API calls (headers/token will be provided), make the request properly and extract required data.
-        4. Use an **LLM API (AIPIPE_URL)** to generate the best answer using the scraped question and choices.
-        5. Submit the answer to the **submission endpoint on the same page** (usually in a form tag, hidden input, or API POST URL).
-        6. **If submission response returns another quiz URL**, repeat the entire process recursively until:
-        - No new URL is returned → quiz completed.
-        - or maximum retries reached (3 attempts).
-        7. If incorrect, resubmit ONCE after improving response.
-        8. All **tokens, API keys, and secrets must come from environment variables**, NOT hardcoded.
-        ### Types of quiz problems you must handle:
-        - ✔ HTML quizzes (MCQ, text input, forms)
-        - ✔ API-based quizzes (REST/GraphQL/JSON)
-        - ✔ Data extraction (PDF, text, tables, images)
-        - ✔ Data cleaning / processing (text, pandas, NLP)
-        - ✔ Math, statistics, ML inference
-        - ✔ Geospatial or network analysis
-        - ✔ Generate visualizations (images or JSON data for charts)
-        - ✔ JavaScript-rendered content (use requests_html or pyppeteer)
-        ### Script Requirements:
-        - Use: `httpx`, `BeautifulSoup`, `requests_html`, `re`, `json`, `pandas` when needed
-        - Use **async** when beneficial
-        - Handle:
-        - 
-        - Missing fields
-        - HTTP failures
-        - JSON parsing
-        - Form submission
-        - Timeout and retries 
-        - import nest_asyncio
-            nest_asyncio.apply()
-            # then run the generated script as usual
-            import generated_script
-
-        ### Output Format:
-        Return **only Python code**, properly indented, inside triple backticks.
-        The Python script must:
-        - Be standalone and executable
-        - Set session timeout to 30 seconds.
-        - Use environment variables like:
-            AIPIPE_TOKEN = os.getenv("AIPIPE_TOKEN")
-            SECRET_KEY = os.getenv("SECRET_KEY")
-            AIPIPE_URL = os.getenv("AIPIPE_URL")
-        - starturl is passed as command line argument sys.argv[1]
-        Use best logic to repeatedly extract and solve until completion.
-        Now, generate the full Python script below.
-        """
+✅ Detect <div class="hidden-key"> and decode reversed answers
+✅ Handle MCQ, text input, API-based, and recursive quizzes
+✅ Use only aiohttp, httpx, BeautifulSoup, asyncio, json, re, os, sys
+❌ Never use requests_html, AsyncHTMLSession, playwright, or sync requests
+⚙️ Use proper async/await, context management, and error handling
+🔥 Updated Prompt (Use this in your FastAPI app)
+You are an advanced Python automation agent.
+🎯 Goal:
+Generate a fully functional, executable Python script that automatically solves quizzes dynamically from URLs using asynchronous logic and safe libraries.
+---
+📌 Core Functional Requirements:
+1. Start from `starturl` (passed as `sys.argv[1]`).
+2. Fetch page content using ONLY:
+   ✔ aiohttp.ClientSession() for HTML pages  
+   ✔ httpx.AsyncClient() for API calls  
+   ❌ Do NOT use requests_html, AsyncHTMLSession, requests, selenium, playwright.
+3. Parse content using BeautifulSoup or JSON.
+---
+🧠 Quiz Type Detection Logic:
+Automatically detect the quiz type using these rules:
+🟢 Type 1: Hidden text quiz  
+- Detect: `<div class="hidden-key">`  
+- Extract reversed string → reverse it using `[::-1]`  
+- Use that as the final answer  
+🟢 Type 2: Multiple Choice Quiz  
+- Detect `<input type="radio">`, `<button>`, or `<label>`  
+- Extract question and choices  
+- Send to LLM API to determine best answer  
+🟢 Type 3: Text Input Quiz  
+- Detect `<input type="text">` or `<textarea>`  
+- Extract question text  
+- Send question to LLM API for answer  
+🟡 Type 4: API-Based Quiz  
+- Detect API endpoints in page source (fetch, POST URLs, JSON forms)  
+- Extract API URL, headers, body, and authentication  
+- Call API using httpx.AsyncClient()  
+- Extract answer from response  
+🔁 Recursion:
+If the submission response contains a new quiz URL (redirect or JSON field), repeat the solving workflow up to 3 times.
+🔐 Environment Variables (must be used):
+AIPIPE_TOKEN = os.getenv("AIPIPE_TOKEN")
+SECRET_KEY = os.getenv("SECRET_KEY")
+AIPIPE_URL = os.getenv("AIPIPE_URL")
+📤 LLM Answer Request Format:
+When calling the LLM for reasoning, use:
+  "question": "...",
+  "choices": [...optional...],
+  "context": "...optional..."
+Use httpx.AsyncClient() for POST requests.
+📎 Submission:
+Extract form action URL, hidden input fields, or JSON submission endpoint.
+- Search for any element containing the word `"Submission"` (case-insensitive).
+   - Look for nearby `form` elements, `action` attributes, `button` clicks, or POST URLs.
+   - If JSON APIs are used, detect URL patterns that appear under the `"submission"` section or `"submit_url"` in page scripts or inline JSON.
+Submit answer as form-data or JSON.
+Print submission result and quiz completion status.
+⚙️ Technical Rules:
+✔ Must be fully asynchronous (async def, await, async with)
+✔ Use BeautifulSoup for HTML parsing
+✔ Use httpx or aiohttp only
+✔ Set timeout to 30 seconds
+✔ Handle connection errors, timeouts, invalid HTML, and missing fields
+✔ No hardcoded credentials — only environment variables
+✔ Must run as standalone Python script using:
+python generated_script.py <starturl>
+📝 Output Format:
+Return ONLY Python code (no explanations), wrapped in:
+# full script here
+The script must be complete, clean, and executable.
+Now, generate the complete Python script below that meets all these requirements
+"""
     try:
         generated_code = await call_aipipe(prompt)
+        #print(generated_code)
     except Exception as e:
         print(f"[ERROR] LLM call failed: {e}")
         return
@@ -203,5 +223,3 @@ async def receive_request(request: Request, background_tasks: BackgroundTasks):
         status_code=200,
         content={"message": "Request received successfully", "email": data.get("email")},
     )
-
-
