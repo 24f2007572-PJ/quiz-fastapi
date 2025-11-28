@@ -1,5 +1,6 @@
 fastapi
 uvicorn
+pandas
 httpx
 jinja2
 python-dotenv
@@ -7,3 +8,5 @@ requests-html
 beautifulsoup4
 nest_asyncio
 pydantic
+lxml_html_clean
+aiohttp
