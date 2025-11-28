@@ -6,15 +6,15 @@
 </head>
 <body>
     <h1>Test Page</h1>
-    <p id="quiz">Question : What is 1+1 ? </p>
+    <p id="question">Question : What is 1+1 ? </p>
     <div>
-Post your answer to url https://24F2007572-quiz-fastapi.hf.space/receive_request with this JSON payload:
+Post your answer to url https://example.com/submit with this JSON payload:
 <pre>
 {
-  "email": "24f2007572@ds.study.iitm.ac.in",
+  "email": "your-email",
   "secret": "your secret",
-  "url": "https://24F2007572-quiz-fastapi.hf.space/receive_request",
-  "answer": 2 // the correct answer
+  "url": "https://localhost:8000/",
+  "answer": 12345  // the correct answer
 }
 </pre>
 </div>
