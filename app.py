@@ -221,22 +221,35 @@ RULES YOU MUST FOLLOW:
        response = await client.get(starturl)
 5. NEVER include placeholder strings like "<quiz url>" or "<submit url>".
 6. Extract the submit URL from the quiz page HTML using regex or BeautifulSoup.
-7. Compute the quiz answer.
-8. Post the answer using:
+7.	The submit URL MUST be derived from the quiz page as follows:
+o	The page shows the submit path as /submit
+o	The full submit URL is constructed using the origin of response.url
+o	You MAY extract /submit from HTML, but you MUST combine it with the inferred origin
+8.	You MUST extract the submit URL using regex or BeautifulSoup. (HTML contains: /submit)
+
+8. You MUST compute the correct quiz answer from the quiz page content.
+9. Post the answer using:
        await client.post(submit_url, json=payload)
-9. Payload MUST be EXACTLY:
+10. Payload MUST be EXACTLY:
    {
        "email": "24f2007572@ds.study.iitm.ac.in",
        "secret": "peacock",
        "url": starturl,
        "answer": <computed answer>
    }
-10. The code MUST define an async main() function. Do NOT call main() yourself.
-11. The code MUST run without syntax errors.
+11. The code MUST define an async main() function. Do NOT call main() yourself.
+12. The code MUST run without raising syntax errors or NameError.
 
-TASK:
-Fetch the quiz page at `starturl`, extract the question, compute the answer, extract the submit URL, and POST the answer.
-pass the starturl variable to the python code.
+TASK of the code you generate:
+•	The variable starturl is provided to the program.
+•	Fetch the quiz page at starturl
+•	Extract the question from the page
+•	Compute the correct answer
+•	Infer the submit URL - steps give above
+•	POST the answer using payload format given above
+    Wait for the POST response
+    Extract the next URL from the response
+    Display the next URL
 Return ONLY:
 
 ```python
@@ -257,7 +270,7 @@ Return ONLY:
          # Replace placeholder URLs
         placeholders = [
             "<the quiz URL>", "<the quiz URL you fetched>",
-             "<quiz url>", "<quiz_url>", "YOUR_START_URL_HERE","https://example.com/quiz"
+             "<quiz url>", "<quiz_url>", "YOUR_START_URL_HERE","https://example.com/quiz","your_quiz_page_url_here"
         ]
         for ph in placeholders:
             generated_code = generated_code.replace(ph, starturl)
@@ -299,3 +312,7 @@ async def receive_request(request: Request, background_tasks: BackgroundTasks):
 # ------------------------
 # Run the server
 # ------------------------
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
